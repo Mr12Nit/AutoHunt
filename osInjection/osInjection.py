@@ -79,6 +79,9 @@ class osInjection:
                 return False
         except:
             print("response doesn't have test")
+    
+    def BlindOsCommandInjection(self):
+        pass # to make later
 
             
 if __name__ == "__main__":
