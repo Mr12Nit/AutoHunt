@@ -108,6 +108,6 @@ if __name__ == "__main__":
 
 
     Test = osInjection(TargetUrl=url,headers=headers,data=PostData,endpoint=EndPoint, PostOsInject=osInjectPost, osInjectGet=osInjectGet)
-    Test.checkOsInjectGet()
+    Test.checkOsInjectPost()
 
     
