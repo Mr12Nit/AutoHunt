@@ -73,8 +73,12 @@ class osInjection:
     
     def checkResponseResult(self, response):
         try:
-            if response.status_code == 200 and "test" in response.text and "echo" not in response.text:
-                return True
+            if response.status_code == 200 :
+                responseWithoutPayload = response.text.replace("echo test","")
+                if "test" in responseWithoutPayload:
+                    return True
+                else:
+                    return False
             else:
                 return False
         except:
@@ -108,6 +112,6 @@ if __name__ == "__main__":
 
 
     Test = osInjection(TargetUrl=url,headers=headers,data=PostData,endpoint=EndPoint, PostOsInject=osInjectPost, osInjectGet=osInjectGet)
-    Test.checkOsInjectPost()
+    Test.checkOsInjectGet()
 
     
