@@ -14,7 +14,7 @@ proxies = {
 }
 
 class xss:
-    def __init__(self, TargetUrl, headers=None, data=None, endpoint=None, PostXss=None,GetXss=None, payloadFile=None):
+    def __init__(self, TargetUrl, headers=None, data=None, endpoint=None, PostXss=None,GetXss=None, payloadFile=None, isStored=None ):
         self.TargetUrl = TargetUrl
         self.hostName = self.getHostname(TargetUrl)
         self.headers = headers
@@ -24,6 +24,7 @@ class xss:
         self.payloads = self.ReadPayloads()
         self.PostXss = PostXss
         self.GetXss = GetXss
+        self.isStored = isStored
 
     def ReadPayloads(self):
         try:
@@ -48,13 +49,19 @@ class xss:
             print("error in sending post")
             return False
     
-    def checkXssPost(self):
+    def checkXssPost(self, escapeElement=None):
         if self.headers and self.endpoint and self.data and self.PostXss :
             for i in self.payloads:
-                self.data[self.PostXss] = i
-                response = self.sendPost()
-                if self.checkResponseResult(response):
-                    print("xss Found",i,"   ",self.TargetUrl)
+                if escapeElement:
+                        escapedPayloads = self.escapElementPayload(i)
+                else:
+                        escapedPayloads = self.escapePayload(i)
+
+                for p in escapedPayloads:
+                    self.data[self.PostXss] = p
+                    response = self.sendPost()
+                    if self.checkResponseResult(response, i):
+                        print("xss Found",i,"   ",self.TargetUrl)
         else:
             print("all parameter must be passed")
 
@@ -97,15 +104,59 @@ class xss:
             print("response doesn't have test")
     
     def escapePayload(self, payload):
-        escape = ['">',"'>",'-->','</script>']
+        escape = ['','">',"'>",'-->','</script>']
         return [i+payload for i in escape]
 
     def escapElementPayload(self, payload):
         escape = ['','">', "'>", '-->', '</script>', '</a>', '</a2>', '</area>', '</article>', '</aside>', '</b>', '</blockquote>', '</body>', '</br>', '</button>', '</canvas>', '</caption>', '</code>', '</col>', '</data>', '</datalist>', '</dd>', '</div>', '</dl>', '</dt>', '</embed>', '</figure>', '</font>', '</footer>', '</form>', '</frame>', '</frameset>', '</h1>', '</head>', '</header>', '</hgroup>', '</hr>', '</html>', '</i>', '</iframe>', '</iframe2>', '</image>', '</image2>', '</image3>', '</img>', '</img2>', '</input>', '</input2>', '</input3>', '</input4>', '</label>', '</li>', '</link>', '</listing>', '</map>', '</mark>', '</marquee>', '</menu>', '</menuitem>', '</meta>', '</meter>', '</multicol>', '</nav>', '</nextid>', '</noembed>', '</noframes>', '</noscript>', '</object>', '</ol>', '</optgroup>', '</option>', '</output>', '</p>', '</param>', '</picture>', '</plaintext>', '</pre>', '</progress>', '</q>', '</rb>', '</rp>', '</rt>', '</rtc>', '</ruby>', '</s>', '</samp>', '</script>', '</section>', '</select>', '</set>', '</small>', '</source>', '</spacer>', '</span>', '</strike>', '</strong>', '</style>', '</sub>', '</summary>', '</sup>', '</svg>', '</table>', '</tbody>', '</td>', '</template>', '</textarea>', '</tfoot>', '</th>', '</thead>', '</time>', '</title>', '</tr>', '</track>', '</tt>', '</u>', '</ul>', '</var>', '</video>', '</video2>', '"></a>', '"></a2>', '"></area>', '"></article>', '"></aside>', '"></b>', '"></blockquote>', '"></body>', '"></br>', '"></button>', '"></canvas>', '"></caption>', '"></code>', '"></col>', '"></data>', '"></datalist>', '"></dd>', '"></div>', '"></dl>', '"></dt>', '"></embed>', '"></figure>', '"></font>', '"></footer>', '"></form>', '"></frame>', '"></frameset>', '"></h1>', '"></head>', '"></header>', '"></hgroup>', '"></hr>', '"></html>', '"></i>', '"></iframe>', '"></iframe2>', '"></image>', '"></image2>', '"></image3>', '"></img>', '"></img2>', '"></input>', '"></input2>', '"></input3>', '"></input4>', '"></label>', '"></li>', '"></link>', '"></listing>', '"></map>', '"></mark>', '"></marquee>', '"></menu>', '"></menuitem>', '"></meta>', '"></meter>', '"></multicol>', '"></nav>', '"></nextid>', '"></noembed>', '"></noframes>', '"></noscript>', '"></object>', '"></ol>', '"></optgroup>', '"></option>', '"></output>', '"></p>', '"></param>', '"></picture>', '"></plaintext>', '"></pre>', '"></progress>', '"></q>', '"></rb>', '"></rp>', '"></rt>', '"></rtc>', '"></ruby>', '"></s>', '"></samp>', '"></script>', '"></section>', '"></select>', '"></set>', '"></small>', '"></source>', '"></spacer>', '"></span>', '"></strike>', '"></strong>', '"></style>', '"></sub>', '"></summary>', '"></sup>', '"></svg>', '"></table>', '"></tbody>', '"></td>', '"></template>', '"></textarea>', '"></tfoot>', '"></th>', '"></thead>', '"></time>', '"></title>', '"></tr>', '"></track>', '"></tt>', '"></u>', '"></ul>', '"></var>', '"></video>', '"></video2>']
         return [i+payload for i in escape]
 
-    def StoredXss(self):
-        pass
+    def checkStoredXss(self, payload):
+        if self.isStored:
+            response = requests.get(self.isStored)
+            if self.checkResponseResult(response, payload):
+                return True
+            else:
+                return False
+        else:
+            print("no path to check if sotred")
+
+    def storedXssGet(self, escapeElement=None):
+        if self.isStored :
+            try:
+                if self.GetXss in self.TargetUrl:
+                    for i in self.payloads:
+                        if escapeElement:
+                            escapedPayloads = self.escapElementPayload(i)
+                        else:
+                            escapedPayloads = self.escapePayload(i)
+                        for p in escapedPayloads:
+                            TargetUrl = self.TargetUrl.replace(self.GetXss, p)
+                            response = requests.get(TargetUrl)
+                            if self.checkStoredXss(ri):
+                                print("Xss found in ",p,f"  {TargetUrl}")
+                                #return True
+            except:
+                print("error in sending get")
+                return False
+                
+
+    def storedXssPost(self, escapeElement=None):
+        if self.headers and self.endpoint and self.data and self.PostXss :
+            for i in self.payloads:
+                if escapeElement:
+                    escapedPayloads = self.escapElementPayload(i)
+                else:
+                    escapedPayloads = self.escapePayload(i)
+
+                for p in escapedPayloads:
+                    self.data[self.PostXss] = p
+                    response = self.sendPost()
+                    if self.checkStoredXss(i):
+                        print("xss Found",i,"   ",self.TargetUrl)
+                        #return True
+        else:
+            print("all parameter must be passed")
         
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Xss script", add_help=False)
@@ -117,6 +168,8 @@ if __name__ == "__main__":
     parser.add_argument('--GetXss', type=str, help='Input which will be the payload')
     parser.add_argument('--PostXss', type=str, help='Input which will be the payload in the post')
     parser.add_argument('--payloadFile', type=str, help='Input file contains the paylaods')
+    parser.add_argument('--isStored', type=str, help='where to check if the payload is stored in the website')
+
 
 
 
@@ -131,9 +184,10 @@ if __name__ == "__main__":
     GetXss = args.GetXss
     PostXss = args.PostXss
     payloadFile = args.payloadFile
+    isStored = args.isStored
 
 
-    Test = xss(TargetUrl=url,headers=headers,data=PostData,endpoint=EndPoint,GetXss=GetXss, payloadFile=payloadFile)
-    Test.checkXssGet()
+    Test = xss(TargetUrl=url,headers=headers,data=PostData,endpoint=EndPoint,GetXss=GetXss,PostXss=PostXss, payloadFile=payloadFile, isStored=isStored)
+    Test.storedXssPost()
 
     
