@@ -56,6 +56,8 @@ class MapApp:
         if href and http:
             http.extend(href)
             return list(set(http))
+    
+    
 
 
 if __name__ == '__main__':
