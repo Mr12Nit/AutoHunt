@@ -3,6 +3,9 @@ import re
 from bs4 import BeautifulSoup
 from sys import path as sysPath
 from os import path as osPath
+import json
+import argparse
+
 
 current_script_dir = osPath.dirname(osPath.abspath(__file__))
 project_folder = osPath.abspath(osPath.join(current_script_dir, '..'))
@@ -22,7 +25,7 @@ class MapApp:
             if response.status_code == 200:
                 url_pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
                 links = re.findall(url_pattern, response.text)
-                self.logger.info("done finding the urls in the link")
+                self.logger.info(f"done finding the urls in the link {response.url}")
                 return links
             else:
                 self.logger.error("response code is not 200")
@@ -43,6 +46,9 @@ class MapApp:
                         newLinks.append(i)
                     elif i.startswith("/"):
                         newLinks.append(response.url[:-1]+i)
+                    else:
+                        newLinks.append(response.url[:-1]+i)
+                self.logger.info(f"done finding all href links in the url {response.url}")
                 return newLinks
             else:
                 self.logger.error("response code is not 200")
@@ -62,12 +68,22 @@ class MapApp:
 
 if __name__ == '__main__':
     print("hellp")
-    url = 'https://www.wikipedia.org'
+    parser = argparse.ArgumentParser(description="Map the application and find entry points ", add_help=False)
+    parser.add_argument('--help', '-h', action='help', help='this is a help message')
+    parser.add_argument('--url', type=str, help='Input dictionary headers like {"key":"value"}')
+    parser.add_argument('--headers', type=str, help='Input dictionary headers like {"key":"value"}')
+    parser.add_argument('--postData', type=str, help='Input dictionary PostData like {"key":"value"}')
+    parser.add_argument('--endPoint', type=str, help='Input str')
+
+
+
+    args = parser.parse_args()
+    url = args.url
+    headers = json.loads(args.headers) if args.headers else None
+    postData = json.loads(args.postData) if args.postData else None
+    endPoint = args.endPoint
+
+    x = MapApp(url=url)
     response = BaseClass.BaseClass.sendGetRequest(url)
-    x = MapApp(url)
     links = x.findAllLinks(response)
-    BaseClass.BaseClass.writeToFile("links",links)
-    http = x.findHttpLinks(response)
-    BaseClass.BaseClass.writeToFile("http",http)
-    href = x.findHrefLinks(response)
-    BaseClass.BaseClass.writeToFile("href",href)
+    BaseClass.BaseClass.writeToFile("links.txt",links)
