@@ -139,7 +139,7 @@ class xss:
                         for p in escapedPayloads:
                             TargetUrl = self.TargetUrl.replace(self.GetXss, p)
                             response = requests.get(TargetUrl)
-                            if self.checkStoredXss(ri):
+                            if self.checkStoredXss(i):
                                 print("Xss found in ",p,f"  {TargetUrl}")
                                 #return True
             except:
@@ -221,6 +221,6 @@ if __name__ == "__main__":
 
 
     Test = xss(TargetUrl=url,headers=headers,data=PostData,endpoint=EndPoint,GetXss=GetXss,PostXss=PostXss, payloadFile=payloadFile, isStored=isStored, blindUrl=blindUrl)
-    Test.xssBlind()
+    Test.checkXssGet()
 
     

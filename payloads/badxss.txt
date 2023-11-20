@@ -1,0 +1,3 @@
+'-alert(1)-'  is found in the response
+/alert(1)//\  is found in the response
+/alert(1)}//\  is found in the response
