@@ -35,11 +35,15 @@ class MapApp:
                 soup = BeautifulSoup(response.text, 'html.parser')
                 all_href_attributes = [tag.get('href') for tag in soup.find_all(attrs={'href': True})]
                 all_href_attributes = list(set(all_href_attributes))
+                newLinks = []
                 for i in all_href_attributes:
-                    if not i.startswith("http"):
-                        all_href_attributes.remove(i)
-                        all_href_attributes.append(response.url[:-1]+i)
-                return all_href_attributes
+                    if i.startswith("//"):
+                        newLinks.append("https://"+i[1:])
+                    elif i.startswith("http"):
+                        newLinks.append(i)
+                    elif i.startswith("/"):
+                        newLinks.append(response.url[:-1]+i)
+                return newLinks
             else:
                 self.logger.error("response code is not 200")
         except Exception as e:
