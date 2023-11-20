@@ -1,8 +1,12 @@
 import requests
 import re
-from sys import path
+from sys import path as sysPath
+from os import path as osPath
 
-path.append('/home/mr124/Project/BugHunting')
+current_script_dir = osPath.dirname(osPath.abspath(__file__))
+project_folder = osPath.abspath(osPath.join(current_script_dir, '..'))
+sysPath.append(project_folder)
+
 from BaseClass import BaseClass
 
 if __name__ == '__main__':

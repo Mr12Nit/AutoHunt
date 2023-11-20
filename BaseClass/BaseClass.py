@@ -133,9 +133,10 @@ class BaseClass:
     def findLinks(response):
         try:
             if response.status_code == 200:
-                links = re.findall(r'href=["\'](https?://\S+)', response.text)
+                url_pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+                links = re.findall(url_pattern, response.text)
                 return links
             else:
-                print("response code is not 200")
+                logger.error("response code is not 200")
         except:
-            print("error in finding links")
+            logger.error("error in finding links")
