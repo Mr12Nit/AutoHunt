@@ -129,14 +129,3 @@ class BaseClass:
         except:
             print(f"error in finding {text} in response")
 
-    @staticmethod
-    def findLinks(response):
-        try:
-            if response.status_code == 200:
-                url_pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
-                links = re.findall(url_pattern, response.text)
-                return links
-            else:
-                logger.error("response code is not 200")
-        except:
-            logger.error("error in finding links")
