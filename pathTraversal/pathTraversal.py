@@ -6,6 +6,17 @@ import json
 import argparse
 from os import system
 
+
+from sys import path as sysPath
+from os import path as osPath
+
+current_script_dir = osPath.dirname(osPath.abspath(__file__))
+project_folder = osPath.abspath(osPath.join(current_script_dir, '..'))
+sysPath.append(project_folder)
+
+from BaseClass import BaseClass
+
+
 proxy_url = 'http://127.0.0.1:8080'
 proxies = {
     'http': proxy_url,
@@ -49,15 +60,11 @@ class PostTraversal:
 
 
     def runDotdotpwn(self):
-        if self.GetTraversal:
+        if self.GetTraversal and BaseClass.BaseClass.chekcTool("dotdotpwn"):
             self.TargetUrl = self.TargetUrl.replace(self.GetTraversal,"TRAVERSAL")
             command = f'dotdotpwn -m http-url -u {self.TargetUrl} -k "root" -b '
             print(f"running Path Traversal on {self.TargetUrl}")
             system(f'echo -e "\\n" | {command}')
-
-
-
-
 
 
 
