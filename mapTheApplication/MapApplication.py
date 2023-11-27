@@ -62,7 +62,9 @@ class MapApp:
         if href and http:
             http.extend(href)
             return list(set(http))
-    
+        else:
+            self.logger.error("error in finding all links")
+            return False
     
 
 
@@ -87,3 +89,5 @@ if __name__ == '__main__':
     response = BaseClass.BaseClass.sendGetRequest(url)
     links = x.findAllLinks(response)
     BaseClass.BaseClass.writeToFile("links.txt",links)
+    print(links)
+    

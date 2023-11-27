@@ -225,6 +225,5 @@ if __name__ == "__main__":
 
 
     Test = xss(TargetUrl=url,headers=headers,data=PostData,endpoint=EndPoint,GetXss=GetXss,PostXss=PostXss, payloadFile=payloadFile, isStored=isStored, blindUrl=blindUrl)
-    Test.checkXssGet()
+    Test.xssBlind()
 
-    
