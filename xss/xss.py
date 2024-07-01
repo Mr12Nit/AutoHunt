@@ -88,7 +88,7 @@ class xss:
                         if self.checkResponseResult(response, i):
                             print("Xss found in ",p,f"  {TargetUrl}")
                             #return True
-        except Exceptions as e:
+        except exceptions as e:
             print("error in sending get")
             print(e)
             return False
