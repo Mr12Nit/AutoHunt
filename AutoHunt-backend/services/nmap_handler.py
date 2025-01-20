@@ -120,7 +120,8 @@ class NmapHandler:
         # Placeholder: Add XML or regex-based parsing logic for structured results
         return {"raw_output": output}
 
-# Example:
+
+# Example usage :
 if __name__ == "__main__":
     nmap_handler = NmapHandler()
 
