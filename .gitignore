@@ -170,3 +170,4 @@ docker-compose.override.yml
 
 # Tests folder
 tests/
+log
