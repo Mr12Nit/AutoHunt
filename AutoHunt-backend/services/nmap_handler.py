@@ -40,8 +40,9 @@ class NmapHandler:
 
         # Optimal Nmap command for stealthy network discovery
         command = [
-            "nmap", "-n", "-Pn", "-sS", "--open", "-T4", "--min-hostgroup", "64", "--min-parallelism", "10", subnet
-        ]
+            "nmap", "-n", "-sS", "-T3", "--open", "--host-timeout", "5m", "--max-retries", "2", "--randomize-hosts",
+            "--min-hostgroup", "32", "--min-parallelism", "5", subnet]
+
 
         return_code, stdout, stderr = self.command_handler.execute_command(command)
 
