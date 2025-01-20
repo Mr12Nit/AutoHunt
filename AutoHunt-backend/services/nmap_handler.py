@@ -1,6 +1,9 @@
 import json
 import ipaddress
+from services.log_setup import setup_logger
 from services.commands_handler import CommandsHandler
+
+logger = setup_logger("CommandsHandler", "Nmap_log.txt")
 
 class NmapHandler:
     """
@@ -29,7 +32,10 @@ class NmapHandler:
         Returns:
             list: A list of up and running IP addresses.
         """
+        logger.info("discovering network has started")
+
         if not self._validate_subnet(subnet):
+            logger.error(f"Nmap scan faild due to wrong subnet")
             raise ValueError(f"Invalid subnet format: {subnet}")
 
         # Optimal Nmap command for stealthy network discovery
@@ -64,16 +70,20 @@ class NmapHandler:
 
     def _validate_subnet(self, subnet: str) -> bool:
         """
-        Validate the subnet format.
+        Validate the subnet format. Ensures it is a valid network in CIDR notation
+        and represents an actual subnet (not a single host).
 
         Args:
-            subnet (str): The subnet to validate.
+            subnet (str): The subnet to validate (e.g., "192.168.1.0/24").
 
         Returns:
             bool: True if the subnet is valid, False otherwise.
         """
         try:
-            ipaddress.ip_network(subnet, strict=False)
+            network = ipaddress.ip_network(subnet, strict=True)
+            # Ensure it's a valid subnet (not a single host like /32 or /128)
+            if network.prefixlen == network.max_prefixlen:
+                return False
             return True
         except ValueError:
             return False
@@ -88,6 +98,7 @@ class NmapHandler:
         Returns:
             list: A list of IP addresses that are up.
         """
+        logger.info("Scan has completed, Now extracting the ips")
         up_ips = []
         for line in output.splitlines():
             if "Nmap scan report for" in line:
