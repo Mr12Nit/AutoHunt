@@ -7,16 +7,21 @@ logger = setup_logger("CommandsHandler", "log.txt")
 
 class CommandsHandler:
     """
-    A Class to handle command execution...
+    A Class to handle command execution in a clean and reusable manner.
+
+    Methods:
+        execute_command(command): Executes a shell command and returns output.
+        check_command_success(return_code): Checks if a command was successful.
+        is_tool_installed(tool_name): Checks if a tool is installed on the system.
     """
-    
+
     @staticmethod
-    def execute_command(command: str) -> Tuple[int, str, str]:
+    def execute_command(command: list) -> Tuple[int, str, str]:
         """
         Executes a shell command and returns the output.
 
         Args:
-            command (str): The shell command to execute.
+            command (list): The shell command to execute as a list of arguments.
 
         Returns:
             Tuple[int, str, str]: A tuple containing the return code, standard output, and standard error.
@@ -24,42 +29,49 @@ class CommandsHandler:
         try:
             result = subprocess.run(
                 command,
-                shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True,
-                check=True
+                text=True
             )
             return result.returncode, result.stdout, result.stderr
         except subprocess.CalledProcessError as e:
             logger.error(f"Command failed: {e.cmd}, Return code: {e.returncode}")
             return e.returncode, e.output, e.stderr
+        except FileNotFoundError:
+            logger.error("Command not found. Ensure the tool is installed and available in the system PATH.")
+            return -1, "", "Command not found."
 
     @staticmethod
     def check_command_success(return_code: int) -> bool:
         """
-            checks if the command was successful based on return code
+        Checks if the command was successful based on the return code.
 
-            Returns:
-                bool : True if command was successful, False otherwise
+        Args:
+            return_code (int): The return code from the command execution.
+
+        Returns:
+            bool: True if the command was successful, False otherwise.
         """
-
-        if return_code == 0 :
+        if return_code == 0:
             return True
         else:
             logger.warning(f"Command failed with return code: {return_code}")
             return False
 
-
     @staticmethod
     def is_tool_installed(tool_name: str) -> bool:
         """
-            checks if the tool is installed or not 
+        Checks if a tool is installed on the system.
 
-            Returns:
-                bool: True if the tool is installed, False otherwise
+        Args:
+            tool_name (str): The name of the tool to check.
 
+        Returns:
+            bool: True if the tool is installed, False otherwise.
         """
-        return shutil.which(tool_name) is not None
-
-    
+        if shutil.which(tool_name):
+            logger.info(f"Tool '{tool_name}' is installed.")
+            return True
+        else:
+            logger.warning(f"Tool '{tool_name}' is not installed.")
+            return False
