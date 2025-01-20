@@ -1,5 +1,6 @@
 import json
 import ipaddress
+import os
 from services.log_setup import setup_logger
 from services.commands_handler import CommandsHandler
 
@@ -21,6 +22,17 @@ class NmapHandler:
         Initialize the NmapHandler with a CommandsHandler instance.
         """
         self.command_handler = CommandsHandler()
+    
+    def ensure_sudo(self):
+        """
+        Ensure the script is running with sudo privileges.
+
+        Raises:
+            PermissionError: If the script is not running with sudo privileges.
+        """
+        if os.geteuid() != 0:
+            raise PermissionError("This script must be run with sudo privileges. Use 'sudo' to run the script.")
+
 
     def discover_network(self, subnet: str) -> list:
         """
@@ -32,6 +44,7 @@ class NmapHandler:
         Returns:
             list: A list of up and running IP addresses.
         """
+        self.ensure_sudo()
         logger.info("discovering network has started")
 
         if not self._validate_subnet(subnet):
@@ -61,6 +74,8 @@ class NmapHandler:
         Returns:
             dict: A structured result of the scan including open ports and service details.
         """
+        self.ensure_sudo()
+        
         command = ["nmap", "-sV","-sS", "-O" ,"--top-ports 1000","--reason","--open", ip, "-oX", "-"]  # Service version and OS detection
         return_code, stdout, stderr = self.command_handler.execute_command(command)
 
@@ -121,24 +136,26 @@ class NmapHandler:
         return {"raw_output": output}
 
 
-# Example usage :
+# Example usage:
 if __name__ == "__main__":
     nmap_handler = NmapHandler()
 
-    # Discover the network
     try:
         print("Discovering network...")
         devices = nmap_handler.discover_network("192.168.1.0/24")
         print("Up devices:", devices)
     except ValueError as ve:
         print(f"Validation error: {ve}")
+    except PermissionError as pe:
+        print(f"Permission error: {pe}")
     except RuntimeError as re:
         print(f"Runtime error: {re}")
 
-    # Scan a specific IP
     try:
         print("Scanning target IP...")
         scan_result = nmap_handler.scan_ports("192.168.1.101")
         print("Scan result:", scan_result)
+    except PermissionError as pe:
+        print(f"Permission error: {pe}")
     except RuntimeError as re:
         print(f"Runtime error: {re}")
