@@ -61,7 +61,7 @@ class NmapHandler:
         Returns:
             dict: A structured result of the scan including open ports and service details.
         """
-        command = ["nmap", "-sV", "-A", ip, "-oX", "-"]  # Service version and OS detection
+        command = ["nmap", "-sV","-sS", "-O" ,"--top-ports 1000","--reason","--open", ip, "-oX", "-"]  # Service version and OS detection
         return_code, stdout, stderr = self.command_handler.execute_command(command)
 
         if self.command_handler.check_command_success(return_code):
