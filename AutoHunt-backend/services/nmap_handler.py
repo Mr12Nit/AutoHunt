@@ -1,6 +1,8 @@
 import json
 import ipaddress
 import os
+import re
+
 from services.log_setup import setup_logger
 from services.commands_handler import CommandsHandler
 
@@ -76,7 +78,7 @@ class NmapHandler:
         """
         self.ensure_sudo()
         
-        command = ["nmap", "-sV","-sS", "-O" ,"--top-ports 1000","--reason","--open", ip, "-oX", "-"]  # Service version and OS detection
+        command = ["nmap", "-sV", "-sS", "-O", "--top-ports=1000", "--reason", "--open", ip, "-oN", "-"] # Service version and OS detection
         return_code, stdout, stderr = self.command_handler.execute_command(command)
 
         if self.command_handler.check_command_success(return_code):
@@ -122,19 +124,59 @@ class NmapHandler:
                 up_ips.append(ip)
         return up_ips
 
-    def _parse_nmap_output(self, output: str) -> dict:
+    def _parse_nmap_output(self, output: str) -> list:
         """
-        Parse the raw Nmap output into a structured format.
+        Parses the plain text Nmap output and extracts useful information.
 
         Args:
-            output (str): The raw Nmap output.
+            output (str): Plain text output from Nmap.
 
         Returns:
-            dict: A dictionary representing the parsed scan results.
+            list: List of dictionaries with IP, ports, and services, including versions if available.
+            Example:
+            [
+                {
+                    "ip": "192.168.1.1",
+                    "ports": [
+                        {"port": "22", "service": "ssh", "version": "OpenSSH 7.4"},
+                        {"port": "80", "service": "http", "version": "Apache 2.4.41"}
+                    ]
+                }
+            ]
         """
-        # Placeholder: Add XML or regex-based parsing logic for structured results
-        return {"raw_output": output}
+        try:
+            if not isinstance(output, str):
+                logger.error("Nmap output must be normal text")
+                raise TypeError("Output must be a string.")
 
+            results = []
+            lines = output.splitlines()
+            current_host = None
+
+            for line in lines:
+                # Match the IP address of the host
+                host_match = re.match(r"^Nmap scan report for (.+)", line)
+                if host_match:
+                    current_host = {"ip": host_match.group(1), "ports": []}
+                    results.append(current_host)
+                    continue
+
+                # Match open ports and their details, including service version
+                port_match = re.match(r"^(\d{1,5})/tcp\s+open\s+(\S+)(?:\s+(.+))?", line)
+                if port_match and current_host:
+                    port_data = {
+                        "port": port_match.group(1),
+                        "service": port_match.group(2),
+                        "version": port_match.group(3) if port_match.group(3) else "Unknown"
+                    }
+                    current_host["ports"].append(port_data)
+
+            return results
+
+        except Exception as e:
+            logger("An error happened while parseing nmap output")
+            print(f"Error parsing Nmap output: {e}")
+            return [{"error": "Failed to parse output", "details": str(e)}]
 
 # Example usage:
 if __name__ == "__main__":
