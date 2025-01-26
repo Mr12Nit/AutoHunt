@@ -80,7 +80,7 @@ class NmapHandler:
             dict: A structured result of the scan including open ports and service details.
         """
         
-        command = ["nmap"] + self.DEFAULT_NMAP_FLAGS["port_scan"] + [subnet]
+        command = ["nmap"] + self.DEFAULT_NMAP_FLAGS["port_scan"] + [ip]
         return_code, stdout, stderr = self.command_handler.execute_command(command)
 
         if self.command_handler.check_command_success(return_code):
