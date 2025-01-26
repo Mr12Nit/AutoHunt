@@ -18,12 +18,18 @@ class NmapHandler:
         _validate_subnet(subnet): Validates the subnet format.
         _parse_nmap_output(output): Parses the raw Nmap output into a structured format.
     """
+    DEFAULT_NMAP_FLAGS = {
+        "network_scan": ["-n", "-sS", "-T3", "--open", "--host-timeout", "5m", "--max-retries", "2", "--randomize-hosts", "--min-hostgroup", "32", "--min-parallelism", "5"],
+        "port_scan": ["-sV", "-sS", "-O", "--top-ports=1000", "--reason", "--open"],
+    }
+
 
     def __init__(self):
         """
         Initialize the NmapHandler with a CommandsHandler instance.
         """
         self.command_handler = CommandsHandler()
+        self.ensure_sudo()
     
     def ensure_sudo(self):
         """
@@ -46,17 +52,14 @@ class NmapHandler:
         Returns:
             list: A list of up and running IP addresses.
         """
-        self.ensure_sudo()
         logger.info("discovering network has started")
 
         if not self._validate_subnet(subnet):
-            logger.error(f"Nmap scan faild due to wrong subnet")
+            logger.error(f"Nmap scan failed due to invalid subnet: {subnet}")
             raise ValueError(f"Invalid subnet format: {subnet}")
 
         # Optimal Nmap command for stealthy network discovery
-        command = [
-            "nmap", "-n", "-sS", "-T3", "--open", "--host-timeout", "5m", "--max-retries", "2", "--randomize-hosts",
-            "--min-hostgroup", "32", "--min-parallelism", "5", subnet]
+        command = ["nmap"] + self.DEFAULT_NMAP_FLAGS["network_scan"] + [subnet]
 
 
         return_code, stdout, stderr = self.command_handler.execute_command(command)
@@ -76,9 +79,8 @@ class NmapHandler:
         Returns:
             dict: A structured result of the scan including open ports and service details.
         """
-        self.ensure_sudo()
         
-        command = ["nmap", "-sV", "-sS", "-O", "--top-ports=1000", "--reason", "--open", ip, "-oN", "-"] # Service version and OS detection
+        command = ["nmap"] + self.DEFAULT_NMAP_FLAGS["port_scan"] + [subnet]
         return_code, stdout, stderr = self.command_handler.execute_command(command)
 
         if self.command_handler.check_command_success(return_code):
@@ -106,7 +108,7 @@ class NmapHandler:
         except ValueError:
             return False
 
-    def _extract_up_ips(self, output: str) -> list:
+    def _extract_up_ips(self, output: str) -> list[str]:
         """
         Extract the IP addresses of devices that are up from Nmap output.
 
@@ -124,7 +126,8 @@ class NmapHandler:
                 up_ips.append(ip)
         return up_ips
 
-    def _parse_nmap_output(self, output: str) -> list:
+    def _parse_nmap_output(self, output: str) -> list[dict]:
+
         """
         Parses the plain text Nmap output and extracts useful information.
 
@@ -174,7 +177,7 @@ class NmapHandler:
             return results
 
         except Exception as e:
-            logger("An error happened while parseing nmap output")
+            logger.error("Error occurred while parsing Nmap output")
             print(f"Error parsing Nmap output: {e}")
             return [{"error": "Failed to parse output", "details": str(e)}]
 
