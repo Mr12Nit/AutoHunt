@@ -1,25 +1,35 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { Container } from "react-bootstrap";
+import { AppContainer, Footer } from "./styles/AppStyles";
+import Header from "./components/Header";
+import ScanForm from "./components/ScanForm";
+import ScanResults from "./components/ScanResults";
 
-function App() {
+const App = () => {
+  const [results, setResults] = React.useState([]);
+
+  const handleScanSubmit = (event) => {
+    event.preventDefault();
+    setResults([
+      { target: "192.168.1.1", status: "Complete", details: "No issues found." },
+      { target: "example.com", status: "Complete", details: "Vulnerabilities detected." },
+    ]);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AppContainer>
+      <Header />
+      <Container>
+        <h1 className="my-4">Initiate a Scan</h1>
+        <ScanForm onSubmit={handleScanSubmit} />
+        <h2 className="my-4">Scan Results</h2>
+        <ScanResults results={results} />
+      </Container>
+      <Footer>
+        <p>&copy; {new Date().getFullYear()} AutoHunt</p>
+      </Footer>
+    </AppContainer>
   );
-}
+};
 
 export default App;
