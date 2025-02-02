@@ -43,8 +43,13 @@ const App = () => {
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="formTargetURL">
-            <Form.Label>Target URL</Form.Label>
-            <Form.Control type="url" placeholder="https://example.com" />
+            <Form.Label>Target IP</Form.Label>
+            <Form.Control 
+              type="text" 
+              placeholder="192.168.1.1" 
+              pattern="^(?:\d{1,3}\.){3}\d{1,3}$"
+              title="Enter a valid IP address (e.g., 192.168.1.1)" 
+            />
           </Form.Group>
 
           <Button variant="primary" type="submit">
