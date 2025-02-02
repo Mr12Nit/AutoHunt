@@ -1,6 +1,6 @@
 import subprocess
 from typing import Tuple
-from services.log_setup import setup_logger
+from .log_setup import setup_logger
 import shutil  # Built into Python and requires no external dependencies - cross-platform
 
 logger = setup_logger("CommandsHandler", "log.txt")

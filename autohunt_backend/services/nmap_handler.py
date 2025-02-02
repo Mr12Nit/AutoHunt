@@ -3,8 +3,8 @@ import ipaddress
 import os
 import re
 
-from services.log_setup import setup_logger
-from services.commands_handler import CommandsHandler
+from .log_setup import setup_logger
+from .commands_handler import CommandsHandler
 
 logger = setup_logger("CommandsHandler", "Nmap_log.txt")
 
